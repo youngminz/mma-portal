@@ -14,3 +14,6 @@ class EmploymentHistory(TimeStampedModel):
     supplement_duty_in_service_count = models.IntegerField('보충역 복무 인원')
 
     recruitment_status = models.CharField('채용유무', max_length=45)
+
+    class Meta:
+        db_table = 'employment_history'

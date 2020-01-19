@@ -14,3 +14,5 @@ class Company(TimeStampedModel):
     research_field = models.CharField("연구분야", max_length=45)
     department = models.CharField("지방청", max_length=45)
 
+    class Meta:
+        db_table = 'company'
