@@ -1,7 +1,25 @@
 import os
 
+from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+def get_env_variable(var_name, default=None):
+    try:
+        return os.environ[var_name]
+
+    except KeyError:
+        if default is None:
+            error_msg = f"필수 환경 변수 {var_name}가 설정되지 않았습니다."
+            raise ImproperlyConfigured(error_msg)
+
+        return default
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-SECRET_KEY = '_497a61dk##-c==y@*uhd%*&3!e2pwfjhwllc^=9p(uervsvnh'
+SECRET_KEY = get_env_variable("SECRET_KEY")
 DEBUG = False
 ALLOWED_HOSTS = ['*']
 
@@ -44,8 +62,12 @@ WSGI_APPLICATION = 'mma_portal.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': get_env_variable("DATABASE_ENGINE"),
+        'NAME': get_env_variable("DATABASE_NAME"),
+        'USER': get_env_variable("DATABASE_USER"),
+        'PASSWORD': get_env_variable("DATABASE_PASSWORD"),
+        'HOST': get_env_variable("DATABASE_HOST"),
+        'PORT': get_env_variable("DATABASE_PORT"),
     }
 }
 
@@ -68,5 +90,5 @@ LANGUAGE_CODE = 'ko'
 TIME_ZONE = 'Asia/Seoul'
 USE_I18N = True
 USE_L10N = True
-USE_TZ = True
+USE_TZ = False
 STATIC_URL = '/static/'
