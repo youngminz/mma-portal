@@ -1,5 +1,8 @@
-# -*- coding: utf-8 -*-
+import unicodedata
+
 import scrapy
+
+from company.models import Company, EmploymentHistory
 
 
 class CompanyCrawlerSpider(scrapy.Spider):
@@ -47,23 +50,60 @@ class CompanyCrawlerSpider(scrapy.Spider):
 
         result = {
             '업체코드': company_code,
-            '업체명': td[0].xpath('text()').get(),
-            '주소': td[1].xpath('text()').get(),
-            '전화번호': td[2].xpath('text()').get(),
-            '팩스번호': td[3].xpath('text()').get(),
-            '업종': td[4].xpath('text()').get(),
-            '주생산물': td[5].xpath('text()').get(),
-            '기업규모': td[6].xpath('text()').get(),
-            '연구분야': td[7].xpath('text()').get(),
+            '업체명': self.normalize_string(td[0].xpath('text()').get()),
+            '주소': self.normalize_string(td[1].xpath('text()').get()),
+            '전화번호': self.normalize_string(td[2].xpath('text()').get()),
+            '팩스번호': self.normalize_string(td[3].xpath('text()').get()),
+            '업종': self.normalize_string(td[4].xpath('text()').get()),
+            '주생산물': self.normalize_string(td[5].xpath('text()').get()),
+            '기업규모': self.normalize_string(td[6].xpath('text()').get()),
+            '연구분야': self.normalize_string(td[7].xpath('text()').get()),
             '현역배정인원': int(td[8].xpath('text()').get().replace("명", "")),
             '보충역배정인원': int(td[9].xpath('text()').get().replace("명", "")),
             '현역편입인원': int(td[10].xpath('text()').get().replace("명", "")),
             '보충역편입인원': int(td[11].xpath('text()').get().replace("명", "")),
             '현역복무인원': int(td[12].xpath('text()').get().replace("명", "")),
             '보충역복무인원': int(td[13].xpath('text()').get().replace("명", "")),
-            '산학연계여부': response.meta['산학연계여부'],
-            '지방청': response.meta['지방청'],
-            '채용유무': response.meta['채용유무'],
+            '산학연계여부': self.normalize_string(response.meta['산학연계여부']),
+            '지방청': self.normalize_string(response.meta['지방청']),
+            '채용유무': self.normalize_string(response.meta['채용유무']),
         }
 
+        self.save_result(result)
+
         yield result
+
+    @staticmethod
+    def normalize_string(string):
+        string = string or ''
+        string = unicodedata.normalize('NFKC', string)
+        string = string.strip()
+
+        return string
+
+    def save_result(self, params):
+        company, _ = Company.objects.update_or_create(
+            code=params['업체코드'],
+            defaults={
+                'name': params['업체명'] or '',
+                'address': params['주소'] or '',
+                'phone_number': params['전화번호'] or '',
+                'fax_number': params['팩스번호'] or '',
+                'business_type': params['업종'] or '',
+                'main_product': params['주생산물'] or '',
+                'type': params['기업규모'] or '',
+                'research_field': params['연구분야'] or '',
+                'department': params['연구분야'] or '',
+            }
+        )
+
+        EmploymentHistory.objects.create(
+            company=company,
+            active_duty_assign_count=params['현역배정인원'],
+            active_duty_transfer_count=params['현역편입인원'],
+            active_duty_in_service_count=params['현역복무인원'],
+            supplement_duty_assign_count=params['보충역배정인원'],
+            supplement_duty_transfer_count=params['보충역편입인원'],
+            supplement_duty_in_service_count=params['보충역복무인원'],
+            recruitment_status=params['채용유무'] or '',
+        )
