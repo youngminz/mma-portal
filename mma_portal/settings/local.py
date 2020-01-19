@@ -1,3 +1,3 @@
-from mma_portal.settings.production import *
+from mma_portal.settings.base import *
 
 DEBUG = True
