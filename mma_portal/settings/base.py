@@ -108,3 +108,5 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = False
 STATIC_URL = '/static/'
+
+BROKER_URL = get_env_variable("BROKER_URL")
