@@ -77,6 +77,9 @@ DATABASES = {
         'PASSWORD': get_env_variable("DATABASE_PASSWORD"),
         'HOST': get_env_variable("DATABASE_HOST"),
         'PORT': get_env_variable("DATABASE_PORT"),
+        'OPTIONS': {
+            'isolation_level': 'REPEATABLE READ',
+        }
     }
 }
 
