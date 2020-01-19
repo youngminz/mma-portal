@@ -1,10 +1,7 @@
-import os
-import sys
 import django
 
 # DJANGO INTEGRATION
 
-sys.path.append(os.path.dirname(os.path.abspath('.')))
 django.setup()
 
 # DJANGO INTEGRATION
