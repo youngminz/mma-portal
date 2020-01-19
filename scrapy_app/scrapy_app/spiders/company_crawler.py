@@ -27,7 +27,7 @@ class CompanyCrawlerSpider(scrapy.Spider):
 
         for row in rows:
             result = {
-                '산학연계여부': row.xpath('td[1]/text()').get(),
+                '선정년도': row.xpath('td[1]/text()').get(),
                 '지방청': row.xpath('td[2]/text()').get(),
                 '채용유무': row.xpath('td[3]/text()').get(),
             }
@@ -64,7 +64,7 @@ class CompanyCrawlerSpider(scrapy.Spider):
             '보충역편입인원': int(td[11].xpath('text()').get().replace("명", "")),
             '현역복무인원': int(td[12].xpath('text()').get().replace("명", "")),
             '보충역복무인원': int(td[13].xpath('text()').get().replace("명", "")),
-            '산학연계여부': self.normalize_string(response.meta['산학연계여부']),
+            '선정년도': self.normalize_string(response.meta['선정년도']),
             '지방청': self.normalize_string(response.meta['지방청']),
             '채용유무': self.normalize_string(response.meta['채용유무']),
         }
@@ -85,15 +85,16 @@ class CompanyCrawlerSpider(scrapy.Spider):
         company, _ = Company.objects.update_or_create(
             code=params['업체코드'],
             defaults={
-                'name': params['업체명'] or '',
-                'address': params['주소'] or '',
-                'phone_number': params['전화번호'] or '',
-                'fax_number': params['팩스번호'] or '',
-                'business_type': params['업종'] or '',
-                'main_product': params['주생산물'] or '',
-                'type': params['기업규모'] or '',
-                'research_field': params['연구분야'] or '',
-                'department': params['연구분야'] or '',
+                'name': params['업체명'],
+                'address': params['주소'],
+                'phone_number': params['전화번호'],
+                'fax_number': params['팩스번호'],
+                'business_type': params['업종'],
+                'main_product': params['주생산물'],
+                'type': params['기업규모'],
+                'research_field': params['연구분야'],
+                'department': params['지방청'],
+                'selection_year': params['선정년도'],
             }
         )
 
@@ -105,5 +106,5 @@ class CompanyCrawlerSpider(scrapy.Spider):
             supplement_duty_assign_count=params['보충역배정인원'],
             supplement_duty_transfer_count=params['보충역편입인원'],
             supplement_duty_in_service_count=params['보충역복무인원'],
-            recruitment_status=params['채용유무'] or '',
+            recruitment_status=params['채용유무'],
         )
