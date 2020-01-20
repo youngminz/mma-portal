@@ -3,7 +3,7 @@ import unicodedata
 import scrapy
 
 from company.models import Company, EmploymentHistory
-
+from urllib.parse import unquote
 
 class CompanyCrawlerSpider(scrapy.Spider):
     name = 'company_crawler'
@@ -44,12 +44,12 @@ class CompanyCrawlerSpider(scrapy.Spider):
 
     def parse_content(self, response: scrapy.http.Response):
         url = response.url
-        company_code = int(url.split("byjjeopche_cd=")[1].split("&")[0])
+        company_code = unquote(url.split("byjjeopche_cd=")[1].split("&")[0])
 
         td = response.xpath('//table[1]/tbody/tr/td')
 
         result = {
-            '업체코드': company_code,
+            '업체코드': self.normalize_string(company_code),
             '업체명': self.normalize_string(td[0].xpath('text()').get()),
             '주소': self.normalize_string(td[1].xpath('text()').get()),
             '전화번호': self.normalize_string(td[2].xpath('text()').get()),
