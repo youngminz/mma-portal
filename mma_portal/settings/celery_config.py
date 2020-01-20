@@ -22,7 +22,7 @@ task_default_priority = 5
 beat_schedule_company = {
     'task_company_crawl': {
         'task': 'company.tasks.company_crawler.task_company_crawl',
-        'schedule': crontab(),
+        'schedule': crontab(minute=0, hour=0),
     }
 }
 
