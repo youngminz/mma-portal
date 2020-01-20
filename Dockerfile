@@ -11,3 +11,5 @@ RUN pip install -r requirements.txt \
   --trusted-host ftp.daumkakao.com
 
 COPY . .
+
+CMD ["scripts/start_django.sh"]
