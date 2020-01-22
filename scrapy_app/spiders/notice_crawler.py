@@ -1,8 +1,11 @@
+import re
 import unicodedata
+from urllib.parse import unquote
 
 import scrapy
+from django.core.files.uploadedfile import SimpleUploadedFile
 
-from notice.models import Notice
+from notice.models import Attachment, Notice
 
 
 class NoticeCrawlerSpider(scrapy.Spider):
@@ -15,7 +18,7 @@ class NoticeCrawlerSpider(scrapy.Spider):
             "gesipan_gbcd": "13",
             "tmpl_id": "1",
             "menu_id": "m_m8_6",
-            "pageUnit": "10",
+            "pageUnit": "1000",
             "pageIndex": str(page),
         }
 
@@ -34,6 +37,10 @@ class NoticeCrawlerSpider(scrapy.Spider):
 
         for row in rows:
             serial_number = row.get().split("'")[5]
+
+            if Notice.objects.filter(serial_number=serial_number).exists():
+                continue
+
             url = "https://work.mma.go.kr/caisBYIS/board/boardView.do"
             params = {
                 "menu_id": "m_m8_6",
@@ -41,7 +48,7 @@ class NoticeCrawlerSpider(scrapy.Spider):
                 "ilryeon_no": serial_number,
                 "searchCondition": "",
                 "searchKeyword": "",
-                "pageIndex": "10",
+                "pageIndex": "1000",
                 "pageUnit": "1",
             }
             yield scrapy.FormRequest(
@@ -71,9 +78,40 @@ class NoticeCrawlerSpider(scrapy.Spider):
             'serial_number': self.normalize_string(response.meta['serial_number']),
         }
 
-        self.save_result(result)
+        notice, created = self.save_result(result)
 
-        yield result
+        if created:
+            for a_tag in attachments.xpath('a'):
+                href = a_tag.xpath('@href').get()
+                attachment_serial_number = href.split("cheombu_sn=")[1].strip()
+                yield scrapy.Request(
+                    'https://work.mma.go.kr' + href,
+                    meta={'notice': notice, 'attachment_serial_number': attachment_serial_number},
+                    callback=self.download_file,
+                )
+
+    def download_file(self, response: scrapy.http.Response):
+        filename = self._get_filename(response)
+
+        Attachment.objects.create(
+            notice=response.meta['notice'],
+            serial_number=response.meta['attachment_serial_number'],
+            file=SimpleUploadedFile(filename, response.body),
+            file_name=filename,
+        )
+
+    def _get_filename(self, response: scrapy.http.Response):
+        filename = None
+        cd = response.headers.get('Content-Disposition', b'').decode()
+        matches = re.findall(r"filename\*?\s*=\s*"
+                             r"(?:(?P<charset>[^;']+)'(?P<language>[^']*)')?"
+                             r"(\"?)(?P<filename>[^;\"]+)\3(?:\s|;|$)", cd)
+        for m in matches:
+            charset, _, _, fn = m
+            if not filename or charset:  # prefer the "*" version of the directive
+                filename = unquote(fn, encoding=charset or 'US-ASCII')
+
+        return filename
 
     @staticmethod
     def normalize_string(string):
@@ -84,7 +122,7 @@ class NoticeCrawlerSpider(scrapy.Spider):
         return string
 
     def save_result(self, params):
-        Notice.objects.update_or_create(
+        notice, created = Notice.objects.update_or_create(
             serial_number=params['serial_number'],
             defaults={
                 'title': params['title'],
@@ -93,3 +131,5 @@ class NoticeCrawlerSpider(scrapy.Spider):
                 'content': params['content'],
             }
         )
+
+        return notice, created
