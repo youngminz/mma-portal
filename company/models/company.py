@@ -1,5 +1,5 @@
-from django_extensions.db.models import TimeStampedModel
 from django.db import models
+from model_utils.models import TimeStampedModel
 
 
 class Company(TimeStampedModel):
