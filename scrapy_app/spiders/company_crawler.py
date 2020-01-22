@@ -1,9 +1,10 @@
 import unicodedata
+from urllib.parse import unquote
 
 import scrapy
 
 from company.models import Company, EmploymentHistory
-from urllib.parse import unquote
+
 
 class CompanyCrawlerSpider(scrapy.Spider):
     name = 'company_crawler'
