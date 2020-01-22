@@ -34,6 +34,7 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     'django_extensions',
+    'storages',
 ]
 
 LOCAL_APPS = [
@@ -111,3 +112,9 @@ USE_TZ = False
 STATIC_URL = '/static/'
 
 BROKER_URL = get_env_variable("BROKER_URL")
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_STORAGE_BUCKET_NAME = get_env_variable('AWS_STORAGE_BUCKET_NAME')
+AWS_DEFAULT_ACL = 'public-read'
+AWS_LOCATION = 'files/'
+AWS_S3_REGION_NAME = 'ap-northeast-2'
