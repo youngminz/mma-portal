@@ -118,3 +118,4 @@ AWS_STORAGE_BUCKET_NAME = get_env_variable('AWS_STORAGE_BUCKET_NAME')
 AWS_DEFAULT_ACL = 'public-read'
 AWS_LOCATION = 'files/'
 AWS_S3_REGION_NAME = 'ap-northeast-2'
+AWS_QUERYSTRING_AUTH = False
