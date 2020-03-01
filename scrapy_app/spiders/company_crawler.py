@@ -53,8 +53,8 @@ class CompanyCrawlerSpider(scrapy.Spider):
             '업체코드': self.normalize_string(company_code),
             '업체명': self.normalize_string(td[0].xpath('text()').get()),
             '주소': self.normalize_string(td[1].xpath('text()').get()),
-            '전화번호': self.normalize_string(td[2].xpath('text()').get()),
-            '팩스번호': self.normalize_string(td[3].xpath('text()').get()),
+            '전화번호': self.normalize_phone_number(self.normalize_string(td[2].xpath('text()').get())),
+            '팩스번호': self.normalize_phone_number(self.normalize_string(td[3].xpath('text()').get())),
             '업종': self.normalize_string(td[4].xpath('text()').get()),
             '주생산물': self.normalize_string(td[5].xpath('text()').get()),
             '기업규모': self.normalize_string(td[6].xpath('text()').get()),
@@ -80,7 +80,35 @@ class CompanyCrawlerSpider(scrapy.Spider):
         string = unicodedata.normalize('NFKC', string)
         string = string.strip()
 
+        # normalize double space
+        string = ' '.join(string.split())
+
         return string
+
+    @staticmethod
+    def normalize_phone_number(string: str):
+        # extract number only
+        string = ''.join(filter(str.isdecimal, string))
+
+        if string.startswith('02'):
+            if len(string) < 3:
+                return string
+            elif len(string) < 6:
+                return string[0:2] + '-' + string[2:]
+            elif len(string) < 10:
+                return string[0:2] + '-' + string[2:5] + '-' + string[5:]
+            else:
+                return string[0:2] + '-' + string[2:6] + '-' + string[6:]
+
+        else:
+            if len(string) < 4:
+                return string
+            elif len(string) < 7:
+                return string[0:3] + '-' + string[3:]
+            elif len(string) < 11:
+                return string[0:3] + '-' + string[3:6] + '-' + string[6:]
+            else:
+                return string[0:3] + '-' + string[3:7] + '-' + string[7:]
 
     def save_result(self, params):
         company, _ = Company.objects.update_or_create(
