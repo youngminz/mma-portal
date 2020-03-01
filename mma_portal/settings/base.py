@@ -105,6 +105,11 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 AUTH_USER_MODEL = "users.User"
 
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100,
+}
+
 LANGUAGE_CODE = 'ko'
 TIME_ZONE = 'Asia/Seoul'
 USE_I18N = True
