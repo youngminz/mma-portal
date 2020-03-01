@@ -1,0 +1,28 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+  pre_build:
+    commands:
+      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+      - AWS_ACCOUNT_ID="$(aws sts get-caller-identity --output text --query Account)"
+
+  build:
+    commands:
+      - IMAGE_TAG="$(date '+%Y%m%d%H%M%S')"
+      - echo $IMAGE_TAG
+
+      - docker build . --tag $AWS_ACCOUNT_ID.dkr.ecr.ap-northeast-2.amazonaws.com/mma_portal/django:$IMAGE_TAG
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.ap-northeast-2.amazonaws.com/mma_portal/django:$IMAGE_TAG
+
+      - |
+        printf '[{"name":"django","imageUri":"%s"},{"name":"celery-worker","imageUri":"%s"},{"name":"celery-beat","imageUri":"%s"}]' \
+        $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/mma_portal/django:$IMAGE_TAG \
+        $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/mma_portal/django:$IMAGE_TAG \
+        $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/mma_portal/django:$IMAGE_TAG > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json

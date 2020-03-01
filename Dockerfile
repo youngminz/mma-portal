@@ -1,4 +1,4 @@
-FROM python:3.8.1-buster
+FROM python:3.8.2-buster
 
 ENV TZ Asia/Seoul
 ENV DJANGO_SETTINGS_MODULE mma_portal.settings.production
