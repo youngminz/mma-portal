@@ -36,6 +36,7 @@ THIRD_PARTY_APPS = [
     'django_extensions',
     'rest_framework',
     'storages',
+    'django_filters',
 ]
 
 LOCAL_APPS = [
