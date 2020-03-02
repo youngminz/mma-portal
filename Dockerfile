@@ -1,7 +1,7 @@
 FROM python:3.8.2-buster
 
 ENV TZ Asia/Seoul
-ENV DJANGO_SETTINGS_MODULE mma_portal.settings.production
+ENV DJANGO_SETTINGS_MODULE sanupchae.settings.production
 
 WORKDIR /app
 

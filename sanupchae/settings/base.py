@@ -56,7 +56,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-ROOT_URLCONF = 'mma_portal.urls'
+ROOT_URLCONF = 'sanupchae.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -74,7 +74,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'mma_portal.wsgi.application'
+WSGI_APPLICATION = 'sanupchae.wsgi.application'
 
 DATABASES = {
     'default': {
