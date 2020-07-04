@@ -1,4 +1,4 @@
-FROM python:3.8.2-buster
+FROM python:3.8.3-buster
 
 ENV TZ Asia/Seoul
 ENV DJANGO_SETTINGS_MODULE sanupchae.settings.production
